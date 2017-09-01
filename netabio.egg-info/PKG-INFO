@@ -1,0 +1,20 @@
+Metadata-Version: 1.1
+Name: netabio
+Version: 0.0.1
+Summary: Never trust a biologist
+Home-page: https://github.com/Nurtal/NETABIO
+Author: Nurtal
+Author-email: Murlock@gmail.com
+License: UNKNOWN
+Description: # NETABIO
+        
+        
+        work in progress
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 1 - Planning
+Classifier: License :: OSI Approved
+Classifier: Natural Language :: French
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Topic :: Biology
