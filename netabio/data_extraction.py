@@ -101,10 +101,13 @@ def generate_Luminex_data_file(input_data_file, **optional_args):
 
 	- input_data_file is the name of the input data file
 	- optional_args contains the optional parameters, such as:
-	- "phase": The selected phase, could be:
-		- "all" -> get all patients
-		- "I" -> get only phase I patients
-		- "II" -> get only phase II patients
+		- "phase": The selected phase, could be:
+			- "all" -> get all patients
+			- "I" -> get only phase I patients
+			- "II" -> get only phase II patients
+		- "group": by defaut the selected group is disease,
+		   but this parameter can accept:
+		   - "medication" ->
 	"""
 	## preprocessing input file
 	biotoolbox.change_file_format(input_data_file, ",")
@@ -113,13 +116,22 @@ def generate_Luminex_data_file(input_data_file, **optional_args):
 
 	## Looking for optional arguments
 	specific_phase_selected = False
+	specific_group_selected = False
+	artificial_group_selected = False
 	if("phase" in optional_args):
 		specific_phase_selected = True
 		phase_selected = optional_args['phase']
+	if("group" in optional_args):
+		specific_group_selected = True
+		group_selected = optional_args['group']
+		if(group_selected == "medication"):
+			artificial_group_selected = True
+			groupFeatures_to_positions = {}
+
 
 	## Extract Luminex Variables, add the Diagnostic
 	index_to_keep = []
-	diagnostic_index = -1
+	group_index = -1
 	phase_index = -1
 	data = open(data_reformated_file, "r")
 	output = open("Luminex_data.csv", "w")
@@ -128,22 +140,49 @@ def generate_Luminex_data_file(input_data_file, **optional_args):
 		line = line.split("\n")
 		line = line[0]
 		line_in_array = line.split(",")
-		diagnostic = "poulet" # init the variable
+		group = "poulet" # init the variable
 		phase = "choucroute"
 
 		if(cmpt == 0):
 			index = 0
 			header_in_string = ""
-			for element in line_in_array:
-				element_in_array = element.split("\\")
-				if("Luminex" in element_in_array):
-					index_to_keep.append(index)
-					header_in_string += str(element)+","
-				elif("DISEASE" in element_in_array):
-					diagnostic_index = index
-				elif("CSPHASE" in element_in_array):
-					phase_index = index
-				index += 1
+
+
+			if(specific_group_selected):
+				for element in line_in_array:
+					element_in_array = element.split("\\")
+					if("Luminex" in element_in_array):
+						index_to_keep.append(index)
+						header_in_string += str(element)+","
+					elif("CSPHASE" in element_in_array):
+						phase_index = index
+
+					## defaut case
+					elif("DISEASE" in element_in_array and group_selected == "diagnostic"):
+						group_index = index
+					
+					## IN PROGRESS:
+					## TODO: select specific interesting cases
+					elif("SEX" in element_in_array and group_selected == "sex"):
+						group_index = index
+
+					elif("Medication" in element_in_array and group_selected == "medication"):
+						groupFeatures_to_positions[element_in_array[-2]] = index
+
+					
+					index += 1
+
+			else:
+				for element in line_in_array:
+					element_in_array = element.split("\\")
+					if("Luminex" in element_in_array):
+						index_to_keep.append(index)
+						header_in_string += str(element)+","
+					elif("DISEASE" in element_in_array and not specific_group_selected):
+						group_index = index
+					elif("CSPHASE" in element_in_array):
+						phase_index = index
+					index += 1
 
 			header_in_string = header_in_string[:-1]+",Diagnostic"
 			header_in_string = header_in_string.replace(" ", "")
@@ -152,16 +191,35 @@ def generate_Luminex_data_file(input_data_file, **optional_args):
 		else:
 			index = 0
 			line_in_string = ""
-			diagnostic = line_in_array[diagnostic_index]
+			#diagnostic = line_in_array[diagnostic_index]
 			phase = line_in_array[phase_index]
-			if(diagnostic == ""):
-				diagnostic = "control"
+
+			if(specific_group_selected):
+				if(artificial_group_selected):
+		
+					if(group_selected == "medication"):
+						group = ""
+
+						for med in groupFeatures_to_positions.keys():
+							if(line_in_array[groupFeatures_to_positions[med]] == "\"yes\""):
+								group += str(med)+";"
+						group = group[:-1]
+						if(group == ""):
+							group = "control"
+
+				else:
+					group = line_in_array[group_index]
+			else:
+				group = line_in_array[group_index]
+				if(group == ""):
+					group = "control"
+			
 			for element in line_in_array:
 				if(index in index_to_keep):
 					line_in_string += str(element)+","
 				index += 1
 
-			line_in_string = line_in_string[:-1]+","+str(diagnostic)
+			line_in_string = line_in_string[:-1]+","+str(group)
 			line_in_string = line_in_string.replace(" ", "")
 
 			if(specific_phase_selected):
