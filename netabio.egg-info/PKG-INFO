@@ -10,6 +10,9 @@ Description: # NETABIO
         
         
         work in progress
+        
+        => TODO:
+        	- Handle NA variables
 Platform: UNKNOWN
 Classifier: Programming Language :: Python
 Classifier: Development Status :: 1 - Planning

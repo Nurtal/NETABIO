@@ -68,7 +68,7 @@ def filter_NA_values(data_file_name):
 	## find minimum score of NA among variables
 	## Exluding OMICID and DISEASE (every patient should have one)
 	for key in variable_to_NA_proportion.keys():
-		if(key != "\\Clinical\\Sampling\\OMICID" and key != "\\Clinical\\Diagnosis\\DISEASE" and key != "Diagnostic"):
+		if(key != "\\Clinical\\Sampling\\OMICID" and key != "\\Clinical\\Diagnosis\\DISEASE" and key != "Diagnostic" and key != "Disease"):
 			score_list.append(variable_to_NA_proportion[key])
 	minimum_score = min(score_list)
 

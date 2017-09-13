@@ -1,9 +1,17 @@
+MANIFEST.in
+README.md
 setup.py
 netabio/__init__.py
 netabio/biotoolbox.py
+netabio/command_line.py
 netabio/data_extraction.py
+netabio/feature_selection.py
 netabio/na_manager.py
 netabio.egg-info/PKG-INFO
 netabio.egg-info/SOURCES.txt
 netabio.egg-info/dependency_links.txt
+netabio.egg-info/entry_points.txt
 netabio.egg-info/top_level.txt
+netabio/scripts/fs_RFE_analysis.R
+netabio/scripts/fs_attribute_importance_evaluation.R
+netabio/scripts/fs_correlation_matrix_analysis.R
