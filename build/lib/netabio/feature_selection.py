@@ -7,7 +7,8 @@ import glob
 
 from netabio import CORRELATIONMATRIX_SCRIPT
 from netabio import ATTRIBUTEIMPORTANCE_SCRIPT
-from netabio import RFE_SCRIPT 
+from netabio import RFE_SCRIPT
+from netabio import BORUTA_SCRIPT
 
 def run_analyser(input_data, output_folder, analysis):
 	"""
@@ -20,7 +21,8 @@ def run_analyser(input_data, output_folder, analysis):
 		- "covarianceMatrix"
 		- "attributeImportance"
 		- "RFE"
-		- "all" (perform all 3 analysis)
+		- "Boruta"
+		- "all" (perform all 4 analysis)
 
 	-> exemple of use:
 		run_analyser("/home/foulquier/Bureau/SpellCraft/WorkSpace/TRASH/data3.csv", "/home/foulquier/Bureau/SpellCraft/WorkSpace/TRASH/", "RFE")
@@ -48,30 +50,21 @@ def run_analyser(input_data, output_folder, analysis):
 	if(os.path.isfile(input_data)):
 		valid_input = True
 
-	## Get path to R script
-	#correlationMatrix_script = get_script_path('fs_correlation_matrix_analysis.R')
-	#attributeImportance_script = get_script_path('fs_attribute_importance_evaluation.R')
-	#RFE_script = get_script_path('fs_RFE_analysis.R')
-
 	## Run the R script
 	if(valid_output and valid_input):
 		if(analysis == "covarianceMatrix"):
-			#os.system("Rscript scripts/fs_correlation_matrix_analysis.R "+str(input_data)+" "+str(output_folder))
 			os.system("Rscript "+CORRELATIONMATRIX_SCRIPT+" "+str(input_data)+" "+str(output_folder))
 		elif(analysis == "attributeImportance"):
-			#os.system("Rscript scripts/fs_attribute_importance_evaluation.R "+str(input_data)+" "+str(output_folder))
 			os.system("Rscript "+ATTRIBUTEIMPORTANCE_SCRIPT+" "+str(input_data)+" "+str(output_folder))
 		elif(analysis == "RFE"):
-			#os.system("Rscript scripts/fs_RFE_analysis.R "+str(input_data)+" "+str(output_folder))
 			os.system("Rscript "+RFE_SCRIPT+" "+str(input_data)+" "+str(output_folder))
+		elif(analysis == "Boruta"):
+			os.system("Rscript "+BORUTA_SCRIPT+" "+str(input_data)+" "+str(output_folder))
 		elif(analysis == "all"):
-			#os.system("Rscript scripts/fs_correlation_matrix_analysis.R "+str(input_data)+" "+str(output_folder))
-			#os.system("Rscript scripts/fs_attribute_importance_evaluation.R "+str(input_data)+" "+str(output_folder))
-			#os.system("Rscript scripts/fs_RFE_analysis.R "+str(input_data)+" "+str(output_folder))
-
 			os.system("Rscript "+CORRELATIONMATRIX_SCRIPT+" "+str(input_data)+" "+str(output_folder))
 			os.system("Rscript "+ATTRIBUTEIMPORTANCE_SCRIPT+" "+str(input_data)+" "+str(output_folder))
 			os.system("Rscript "+RFE_SCRIPT+" "+str(input_data)+" "+str(output_folder))
+			os.system("Rscript "+BORUTA_SCRIPT+" "+str(input_data)+" "+str(output_folder))
 
 
 	elif(not valid_output):
@@ -132,6 +125,11 @@ def write_html_report(report_file, data_file, result_folder):
 			RFE_selected_attributes = result_folder+"RFE_selected_attributes.csv"
 			RFE_image = result_folder+"RFE_accuracy.png"
 
+			Boruta_image_1 = result_folder+"boruta_results_1.png"
+			Boruta_image_2 = result_folder+"boruta_results_2.png"
+			Boruta_results_file = result_folder+"boruta_results.csv"
+
+
 		else:
 			files_in_results_directory = glob.glob(result_folder+separator+"*")
 
@@ -144,6 +142,10 @@ def write_html_report(report_file, data_file, result_folder):
 			RFE_results_file = result_folder+separator+"RFE_results.csv"
 			RFE_selected_attributes = result_folder+separator+"RFE_selected_attributes.csv"
 			RFE_image = result_folder+separator+"RFE_accuracy.png"
+
+			Boruta_image_1 = result_folder+separator+"boruta_results_1.png"
+			Boruta_image_2 = result_folder+separator+"boruta_results_2.png"
+			Boruta_results_file = result_folder+separator+"boruta_results.csv"
 
 		for f in list_of_results_file:
 			if(result_folder[-1] == separator):
@@ -162,6 +164,23 @@ def write_html_report(report_file, data_file, result_folder):
 		report.write("<html>\n")
 		report.write("<title>NETABIO</title>\n")
 		report.write("<h2>Features Selection Report</h2>\n")
+
+
+		## Construct the summary data
+		summary_data = {}
+		data = open(Boruta_results_file, "r")
+		cmpt = 0
+		for line in data:
+			line = line.replace("\n", "")
+			line_in_array = line.split(",")
+			if(cmpt > 0):
+				key = line_in_array[0]
+				summary_data[key] = {"Correlation" : "Pass",
+				                     "Variance" : "Pass",
+				                     "RFE" : "Flagged",
+				                     "Boruta" : "UNDEF"}
+			cmpt += 1
+		data.close()
 
 		##----------------------------##
 		## Work on correlation matrix ##
@@ -206,6 +225,7 @@ def write_html_report(report_file, data_file, result_folder):
 		report.write("<p> Recommand to remove the following (redundant) variables:<p>\n")
 		report.write("<ul>\n")
 		for var in variable_to_remove:
+			summary_data[str(var)]["Correlation"] = "Flagged"
 			report.write("<li>"+str(var)+"</li>\n")
 		report.write("</ul>\n")
 
@@ -221,6 +241,7 @@ def write_html_report(report_file, data_file, result_folder):
 			line_in_array = line.split(",")
 			if("TRUE" in line_in_array and cmpt > 0):
 				variable_to_remove.append(line_in_array[0])
+				summary_data[str(line_in_array[0])]["Variance"] = "Flagged"
 			cmpt += 1
 		data.close()
 
@@ -240,11 +261,12 @@ def write_html_report(report_file, data_file, result_folder):
 		report.write("<h3>Attribute importance</h3>\n")
 		data = open(attribute_importance_file, "r")
 		cmpt = 0
+		report.write("<center>\n")
 		report.write("<table>\n")
 		for line in data:
 			line = line.replace("\n", "")
 			line_in_array = line.split(",")
-			report.write("<tr>\n")
+			report.write("<tr bgcolor=\"#F5F6CE\">\n")
 			for elt in line_in_array:
 				elt = elt.replace("\"", "")
 				if(cmpt == 0):
@@ -255,6 +277,7 @@ def write_html_report(report_file, data_file, result_folder):
 			cmpt += 1
 		data.close()
 		report.write("</table>\n")
+		report.write("</center>\n")
 
 		## Display graphic
 		report.write("<img src="+attribute_importance_image+" style=\"width:600px;height:400px;\">\n")
@@ -275,6 +298,7 @@ def write_html_report(report_file, data_file, result_folder):
 			line = line.replace("\n", "")
 			line_in_array = line.split(",")
 			if(cmpt > 0):
+				summary_data[str(line_in_array[1])]["RFE"] = "Pass"
 				feature = line_in_array[1].replace("\"", "")
 				selected_features.append(feature)
 			cmpt += 1
@@ -290,8 +314,111 @@ def write_html_report(report_file, data_file, result_folder):
 			report.write("<p> No features selected</p>\n")
 
 
+
+		##----------------##
+		## Work on Boruta ##
+		##----------------##
+		report.write("<h3>Boruta</h3>\n")
+
+		## display the two graphic
+		report.write("<img src="+Boruta_image_1+" style=\"width:600px;height:400px;\" align=\"left\">\n")
+		report.write("<img src="+Boruta_image_2+" style=\"width:600px;height:400px;\" align=\"right\">\n")
+
+		## write result table
+		data = open(Boruta_results_file, "r")
+		cmpt = 0
+		report.write("<center>\n")
+		report.write("<table>\n")
+		for line in data:
+			line = line.replace("\n", "")
+			line_in_array = line.split(",")
+			
+			## deal with stupid format
+			if(cmpt == 0):
+				line_in_array = [" "] + line_in_array
+
+			## define the bgcolor
+			bgcolor = "#F5ECCE"
+			if(line_in_array[-1] == "\"Rejected\""):
+				bgcolor = "#DF0101"
+				summary_data[str(line_in_array[0])]["Boruta"] = "Flagged"
+			elif(line_in_array[-1] == "\"Confirmed\""):
+				bgcolor = "#5FB404"
+				summary_data[str(line_in_array[0])]["Boruta"] = "Pass"
+
+			report.write("<tr bgcolor=\""+bgcolor+"\">\n")
+			cmpt_elt = 0
+			for elt in line_in_array:
+				elt = elt.replace("\"", "")
+				if(cmpt == 0):
+					report.write("<th>"+str(elt)+"</th>\n")
+				else:
+					report.write("<td>"+str(elt)+"</td>\n")
+				cmpt_elt += 1
+			report.write("</tr>\n")
+			cmpt += 1
+		data.close()
+		report.write("</table>\n")
+		report.write("</center>\n")
+
+
+		##----------------##
+		## [TODO] Summary ##
+		##----------------##
+		report.write("<h3>Summary</h3>\n")
+
+		## write table
+		report.write("<center>\n")
+		report.write("<table>\n")
+
+		bgcolor = "#F5ECCE"
+
+		##header
+		report.write("<tr bgcolor=\""+bgcolor+"\">\n")
+		report.write("<th>Features</th>\n")
+		report.write("<th>Correlation</th>\n")
+		report.write("<th>Variance</th>\n")
+		report.write("<th>RFE</th>\n")
+		report.write("<th>Boruta</th>\n")
+		report.write("</tr>\n")
+
+		## data
+		for key in summary_data.keys():
+			report.write("<tr bgcolor=\""+bgcolor+"\">\n")
+			report.write("<td>"+str(key)+"</td>\n")
+			if(summary_data[key]["Correlation"] == "Pass"):
+				report.write("<td bgcolor=\"#5FB404\">"+summary_data[key]["Correlation"]+"</td>\n")
+			else:
+				report.write("<td bgcolor=\"#DF3A01\">"+summary_data[key]["Correlation"]+"</td>\n")
+			
+			if(summary_data[key]["Variance"] == "Pass"):
+				report.write("<td bgcolor=\"#5FB404\">"+str(summary_data[key]["Variance"])+"</td>\n")
+			else:
+				report.write("<td bgcolor=\"#DF3A01\">"+str(summary_data[key]["Variance"])+"</td>\n")
+			if(summary_data[key]["RFE"] == "Pass"):
+				report.write("<td bgcolor=\"#5FB404\">"+str(summary_data[key]["RFE"])+"</td>\n")
+			else:
+				report.write("<td bgcolor=\"#DF3A01\">"+str(summary_data[key]["RFE"])+"</td>\n")	
+			if(summary_data[key]["Boruta"] == "Pass"):
+				report.write("<td bgcolor=\"#5FB404\">"+str(summary_data[key]["Boruta"])+"</td>\n")
+			else:
+				report.write("<td bgcolor=\"#DF3A01\">"+str(summary_data[key]["Boruta"])+"</td>\n")
+			report.write("</tr>\n")
+		report.write("</table>\n")
+		report.write("</center>\n")
+
+
+
+
+
+
+
+
+
 		report.write("</html>\n")
 		report.close()
+
+
 	elif(not valid_result_folder):
 		print "[ERROR] => Can't find the output folder "+str(result_folder)
 	elif(not valid_data_file):
@@ -300,24 +427,3 @@ def write_html_report(report_file, data_file, result_folder):
 		print "[ERROR] => following files are missing in "+str(result_folder)+":"
 		for f in missing_files:
 			print "\t-> "+str(f)
-
-
-
-
-
-## TEST SPACE
-"""
-report_file = "/home/foulquier/Bureau/SpellCraft/WorkSpace/TRASH/test.html"
-data_file = "/home/foulquier/Bureau/SpellCraft/WorkSpace/TRASH/data3.csv"
-result_folder = "/home/foulquier/Bureau/SpellCraft/WorkSpace/TRASH"
-"""
-"""
-report_file = "C:\\Users\\NaturalKiller01\\Desktop\\Nathan\\Spellcraft\\TRASH\\report.html"
-#data_file = "C:\\Users\\NaturalKiller01\\Desktop\\Nathan\\Spellcraft\\Luminex_data_NA_filtered.csv"
-data_file = "C:\\Users\\NaturalKiller01\\Desktop\\Nathan\\Spellcraft\\SideQuest\\Bene\\newCytoData.csv"
-result_folder = "C:\\Users\\NaturalKiller01\\Desktop\\Nathan\\Spellcraft\\TRASH"
-
-
-run_analyser(data_file, result_folder, "all")
-write_html_report(report_file, data_file, result_folder)
-"""

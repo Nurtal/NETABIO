@@ -12,3 +12,4 @@ def get_script_path(path):
 CORRELATIONMATRIX_SCRIPT = get_script_path('fs_correlation_matrix_analysis.R')
 ATTRIBUTEIMPORTANCE_SCRIPT = get_script_path('fs_attribute_importance_evaluation.R')
 RFE_SCRIPT = get_script_path('fs_RFE_analysis.R')
+BORUTA_SCRIPT = get_script_path('fs_Boruta_analysis.R')
