@@ -7,6 +7,7 @@ netabio/command_line.py
 netabio/data_extraction.py
 netabio/feature_selection.py
 netabio/na_manager.py
+netabio/quality_control.py
 netabio.egg-info/PKG-INFO
 netabio.egg-info/SOURCES.txt
 netabio.egg-info/dependency_links.txt

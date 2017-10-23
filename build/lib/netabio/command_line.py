@@ -1,5 +1,6 @@
 from netabio import data_extraction
 from netabio import feature_selection
+from netabio import quality_control
 import argparse
 
 def test():
@@ -99,4 +100,24 @@ def features_selection_workspace():
 	feature_selection.run_analyser(data_file, result_folder, "all")
 
 	## write report
-	feature_selection.write_html_report(report_file, data_file, result_folder)
+	feature_selection.write_html_report(report_file, data_file, result_folder)  
+
+
+def quality_control_operation():
+	"""
+	[IN PROGRESS]
+
+
+	"""
+
+
+	## Collect arguments
+	parser = argparse.ArgumentParser(prog='netabio_stuff') # not sure what does the instanciation
+	parser.add_argument('-i', nargs='?', help='the input data file')
+	args = parser.parse_args()
+
+	## Init optionnal arguments
+	collected_inputs = {'i': args.i}
+
+	## main operation
+	quality_control.basic_check(collected_inputs['i'])

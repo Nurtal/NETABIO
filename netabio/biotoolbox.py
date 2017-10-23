@@ -41,7 +41,7 @@ def detect_file_format(data_file_name):
 
 	## Run the analysis if we can
 	if(can_analyse_file):
-		
+
 
 		## Initialize the separator_to_count variable:
 		for separator in separator_list:
@@ -61,7 +61,9 @@ def detect_file_format(data_file_name):
 
 		data_file.close()
 
+
 		## Perform the analysis
+		perfect_separator_found = False
 		for separator in separator_to_count.keys():
 
 			## Separate data and header size
@@ -75,6 +77,10 @@ def detect_file_format(data_file_name):
 			## Perform the test
 			if(max_size != 1 and max_size == min_size):
 				 best_separator = separator
+				 perfect_separator_found = True
+
+			elif(max_size != 1 and max_size != min_size and not perfect_separator_found):
+				best_separator = "Difference in lenght of lines"
 
 		## return the best separator found
 		return best_separator
