@@ -43,7 +43,7 @@ setup(
     #
     # Ex: ["gunicorn", "docutils >= 0.3", "lxml==0.5a7"]
     #
-    # Dans notre cas on en a pas besoin, donc je le commente, mais je le
+    # Dans notre cas on en n'a pas besoin, donc je le commente, mais je le
     # laisse pour que vous sachiez que ça existe car c'est très utile.
     # install_requires= ,
  
