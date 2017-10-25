@@ -105,9 +105,19 @@ def features_selection_workspace():
 
 def quality_control_operation():
 	"""
-	[IN PROGRESS]
-
-
+	-> Run the basic_check function from 
+	   quality_control file, with the data file retrieve
+	   as input.
+	-> Check a few things in data_file
+		-> try to detect the best separator for the file
+		-> make sure all lines are of the same lenght
+		-> Looking for missing values (count and flag the concerning lines)
+		-> Check percentages values, make sure there are between 0 and 100
+		-> Try to detect a header
+		-> Check column composition (containing digit or strings, flag mixt columns
+		   and give the number of the concerning lines).
+		-> Look for outliers, flag concerning lines.
+	-> Display and write results in a log file (current directory)
 	"""
 
 
@@ -121,3 +131,18 @@ def quality_control_operation():
 
 	## main operation
 	quality_control.basic_check(collected_inputs['i'])
+
+
+
+def consistency_control_operation():
+
+	## Collect arguments
+	parser = argparse.ArgumentParser(prog='netabio_stuff') # not sure what does the instanciation
+	parser.add_argument('-i', nargs='?', help='the input data file')
+	args = parser.parse_args()
+
+	## Init optionnal arguments
+	collected_inputs = {'i': args.i}
+
+	## main operation
+	quality_control.consistency_check(collected_inputs['i'])

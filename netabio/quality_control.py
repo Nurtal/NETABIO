@@ -5,7 +5,7 @@
 
 import biotoolbox
 import operator
-
+import numpy as np
 
 
 def check_pourcentages(value):
@@ -37,10 +37,66 @@ def check_pourcentages(value):
 		return alert
 
 
+
+def looking_for_outliers(input_vector, col_number):
+	"""
+	-> Flag outlier in the input_vector, return list of patients
+	   containing outliers
+	"""
+
+	## init structure de retour
+	flag_patients= []
+	number_of_tolerated_std = 5
+
+	## clean vector
+	clean_vector = []
+	index_in_clean_vector_to_patient = {}
+	patient = 0
+	index = 0
+	for scalar in input_vector:
+		scalar = scalar.replace("%", "")
+		scalar = scalar.replace(" ", "")
+		try:
+			scalar = float(scalar)
+			clean_vector.append(scalar)
+			index_in_clean_vector_to_patient[index] = patient
+			index += 1
+		except:
+			do_nothing = 1
+		
+		patient += 1
+
+	## -> flag values distant from the median
+	clean_vector = np.array(clean_vector)
+	index = 0
+	for scalar in clean_vector:
+
+		## -> compute the median
+		## and standard deviation
+		med = np.median(clean_vector)
+		ecart_type = np.std(clean_vector)
+
+		if(float(abs(scalar)) >= float(med+(number_of_tolerated_std*ecart_type)) or float(abs(scalar)) <= float(med-(number_of_tolerated_std*ecart_type))):
+			flag_patients.append(index_in_clean_vector_to_patient[index])
+
+		index+= 1
+
+	return flag_patients
+
+
+
 def basic_check(data_file):
 	"""
-	-> Check a few things
-	[IN PROGRESS]
+	-> Check a few things in data_file
+		-> try to detect the best separator for the file
+		-> make sure all lines are of the same lenght
+		-> Looking for missing values (count and flag the concerning lines)
+		-> Check percentages values, make sure there are between 0 and 100
+		-> Try to detect a header
+		-> Check column composition (containing digit or strings, flag mixt columns
+		   and give the number of the concerning lines).
+		-> Look for outliers, flag concerning lines.
+	-> Display and write results in a log file (current directory)
 	"""
 
 
@@ -287,7 +343,6 @@ def basic_check(data_file):
 		## Check column composition                        ##
 		## Make sure all values has the same type for each ##
 		## variables                                       ##
-		## TODO : gaffe au header !                        ##
 		##-------------------------------------------------##
 
 		## init structure
@@ -342,34 +397,76 @@ def basic_check(data_file):
 				elif(value_type == "string"):
 					string_count += 1
 
-				if(digit_count > string_count):
-					if(string_count == 0):
-						## nothing strange, it's a column full of digit
-						## (minus evntually the NA variables)
-						column_to_type[key] = "digit"
-					else:
-						## Problem, digit and strngs in the same column
-						## but still more digit
-						column_to_type[key] = "digit"
-						print "[ERROR] => find string in a digit column : column "+str(key)
+			if(digit_count > string_count):
+				if(string_count == 0):
+					## nothing strange, it's a column full of digit
+					## (minus evntually the NA variables)
+					column_to_type[key] = "digit"
+				else:
+					## Problem, digit and strngs in the same column
+					## but still more digit
+					column_to_type[key] = "digit"
+					print "[ERROR] => find string in a digit column : column "+str(key)
+					log_file.write("[ERROR] => string found in a digit column : column "+str(key)+"\n")
 
+			else:
+				if(digit_count == 0):
+					## nothing strange, it's a column full of strings
+					## (minus evntually the NA variables)
+					column_to_type[key] = "string"
 
-						## [ TO COMPLETE]
+				else:
+					## Problem, digit and strngs in the same column
+					## but still more or equal strings
+					column_to_type[key] = "string"
+					print "[ERROR] => find digit in a string column : column "+str(key)
+					log_file.write("[ERROR] => digit found in a string column : column "+str(key)+"\n")
+						
 
+		##---------------------##
+		## Looking for outlier ##
+		##---------------------##
 
+		flag_patients = []
 
-
-
-
-
+		for key in variable_to_values.keys():
+			vector = variable_to_values[key]
+			if(column_to_type[key] == "digit"):
+				flag_patient_in_vector = looking_for_outliers(vector, key)
+				for patient in flag_patient_in_vector:
+					print "[WARNINGS] => outlier detected, flag line "+str(patient)+" in column "+str(key)
+					log_file.write("[WARNINGS] => outlier detected, flag line "+str(patient)+" in column "+str(key)+"\n")
 		
-
-
-
 	## Close log file
 	log_file.close()
 
 
+
+
+
+
+
+def consistency_check(data_file):
+	"""
+	[IN PROGRESS]
+	"""
+
+
+
+	print "choucroute"
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## TEST SPACE ##
 
-basic_check("test.txt")
+#basic_check("test.txt")

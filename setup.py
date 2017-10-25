@@ -81,7 +81,9 @@ setup(
         'console_scripts': [
             'net-test = netabio.command_line:test',
             'netabio-features_selection = netabio.command_line:features_selection',
-            'netabio-quality_control = netabio.command_line:quality_control_operation'
+            'netabio-quality_control = netabio.command_line:quality_control_operation',
+            'netabio-consistency_control = netabio.command_line:consistency_control_operation'
+
         ],
     },
  
