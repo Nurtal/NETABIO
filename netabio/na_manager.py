@@ -2,6 +2,8 @@
 => Deal with NA in data files
 """
 
+import matplotlib.pyplot as plt
+
 
 def check_NA_proportion_in_file(data_file_name):
 	"""
@@ -45,6 +47,33 @@ def check_NA_proportion_in_file(data_file_name):
 
 	## return dict
 	return variable_to_NA_count
+
+
+
+def display_NA_proportions(data_file_name):
+	##
+	## -> Generate bar chart of NA values for
+	##    each variables in data_file_name
+	## -> use the check_NA_proportion_in_file() function
+	##    to get the NA proportion
+	## -> Show the bar plot
+	##
+
+	## Get informations
+	variable_to_NA_count = check_NA_proportion_in_file(data_file_name)
+	
+	## Create Plot
+	plt.bar(range(len(variable_to_NA_count)), variable_to_NA_count.values(), align='center')
+	plt.xticks(range(len(variable_to_NA_count)), variable_to_NA_count.keys(), rotation=90)
+
+	## [DISABLE] Save plot
+	#plt.savefig("")
+
+	## Show plot
+	plt.show()
+
+
+
 
 
 def filter_NA_values(data_file_name):
