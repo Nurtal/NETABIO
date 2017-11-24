@@ -464,13 +464,19 @@ def basic_check(data_file):
 
 		flag_variables = []
 
-		variable_to_zscore_mean = check_zscore(data_file)
+		
+		variable_to_zscore_mean = check_zscore(data_file, separator, header_detected)
 		for var in variable_to_zscore_mean.keys():
-
 			if(variable_to_zscore_mean[var] != "NA"):
 				if(variable_to_zscore_mean[var] >= 2 or variable_to_zscore_mean[var] <= -2):
 					print "[WARNINGS] => Strange distribution detected, flag variable: "+str(var)
 					log_file.write("[WARNINGS] => Strange distribution detected, flag variable: "+str(var)+"\n")
+
+
+		
+
+
+
 
 
 	## Close log file
@@ -549,7 +555,7 @@ def check_standard_deviation(data_file_name):
 
 
 
-def check_zscore(data_file_name):
+def check_zscore(data_file_name, separator, header_detected):
 	##
 	## -> Compute the zscore mean for each variables in 
 	## data_file_name.
@@ -567,15 +573,24 @@ def check_zscore(data_file_name):
 	for line in input_data:
 		line = line.split("\n")
 		line = line[0]
-		line_in_array = line.split(",")
+		line_in_array = line.split(separator)
 		
+
 		if(cmpt == 0):
 			index = 0
 			for variable in line_in_array:
-				position_to_variable[index] = variable
-				variable_to_distribution[variable] = []
-				variable_to_zscore_mean[variable] = "NA"
+				
+				if(header_detected):
+					position_to_variable[index] = variable
+					variable_to_distribution[variable] = []
+					variable_to_zscore_mean[variable] = "NA"
+				else:
+					position_to_variable[index] = index
+					variable_to_distribution[index] = []
+					variable_to_zscore_mean[index] = "NA"
+				
 				index +=1
+
 		else:
 			index = 0
 			for scalar in line_in_array:
