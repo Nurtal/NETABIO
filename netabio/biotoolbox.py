@@ -38,6 +38,8 @@ def detect_file_format(data_file_name):
 	## Test if we can do something with it
 	if(cmpt_line > 1):
 		can_analyse_file = True
+	else:
+		best_separator = "not_enough_line"
 
 	## Run the analysis if we can
 	if(can_analyse_file):
@@ -88,7 +90,7 @@ def detect_file_format(data_file_name):
 
 	## Exit The programm with a warning message
 	else:
-		print "[!] Less than 2 lines in the file"+str(data_file_name)+", can't run an analysis\n"
+		print "[!] Can't run an analysis\n"
 		return best_separator
 
 

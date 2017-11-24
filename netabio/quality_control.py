@@ -48,6 +48,7 @@ def looking_for_outliers(input_vector, col_number):
 	## init structure de retour
 	flag_patients= []
 	number_of_tolerated_std = 5
+	zscore_limit = 3
 
 	## clean vector
 	clean_vector = []
@@ -69,6 +70,8 @@ def looking_for_outliers(input_vector, col_number):
 
 	## -> flag values distant from the median
 	clean_vector = np.array(clean_vector)
+	zscores = stats.zscore(clean_vector)
+
 	index = 0
 	for scalar in clean_vector:
 
@@ -77,8 +80,13 @@ def looking_for_outliers(input_vector, col_number):
 		med = np.median(clean_vector)
 		ecart_type = np.std(clean_vector)
 
-		if(float(abs(scalar)) >= float(med+(number_of_tolerated_std*ecart_type)) or float(abs(scalar)) <= float(med-(number_of_tolerated_std*ecart_type))):
+		## Using Z-score
+		if(float(abs(zscores[index])) >= zscore_limit):
 			flag_patients.append(index_in_clean_vector_to_patient[index])
+
+		## old method
+		#if(float(abs(scalar)) >= float(med+(number_of_tolerated_std*ecart_type)) or float(abs(scalar)) <= float(med-(number_of_tolerated_std*ecart_type))):
+		#	flag_patients.append(index_in_clean_vector_to_patient[index])
 
 		index+= 1
 
@@ -116,16 +124,23 @@ def basic_check(data_file):
 	## differences in lenght of lines        ##
 	##---------------------------------------##
 	separator = biotoolbox.detect_file_format(data_file)
-	if(separator == "undef"):
+
+	if(separator == "not_enough_line"):
 		print "[WARNING] => Very few lines in file (Less than 2)"
 		log_file.write("[WARNING] => Very few lines in file (Less than 2)\n")
 	elif("Difference in lenght of lines" in separator):
 		
 		## get best separator
-		separator = separator.split("<sep>")
-		separator = separator[1]
-		print "[ERROR] => Difference in lenght of lines"
-		log_file.write("[ERROR] => Difference in lenght of lines\n")
+		separator = separator.split("<sep>") # not sure what is it about
+
+		if(len(separator) > 1):
+			separator = separator[1]
+			print "[ERROR] => Difference in lenght of lines"
+			log_file.write("[ERROR] => Difference in lenght of lines\n")
+		else:
+			separator = "undef"
+			print "[ERROR] => Difference in lenght of lines"
+			log_file.write("[ERROR] => Difference in lenght of lines\n")
 
 		## check each lenght of line
 		len_of_lines = {}
@@ -442,6 +457,22 @@ def basic_check(data_file):
 					print "[WARNINGS] => outlier detected, flag line "+str(patient)+" in column "+str(key)
 					log_file.write("[WARNINGS] => outlier detected, flag line "+str(patient)+" in column "+str(key)+"\n")
 		
+
+		##---------------##
+		## Check Z-score ##
+		##---------------##
+
+		flag_variables = []
+
+		variable_to_zscore_mean = check_zscore(data_file)
+		for var in variable_to_zscore_mean.keys():
+
+			if(variable_to_zscore_mean[var] != "NA"):
+				if(variable_to_zscore_mean[var] >= 2 or variable_to_zscore_mean[var] <= -2):
+					print "[WARNINGS] => Strange distribution detected, flag variable: "+str(var)
+					log_file.write("[WARNINGS] => Strange distribution detected, flag variable: "+str(var)+"\n")
+
+
 	## Close log file
 	log_file.close()
 
