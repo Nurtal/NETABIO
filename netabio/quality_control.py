@@ -6,6 +6,7 @@
 import biotoolbox
 import operator
 import numpy as np
+from scipy import stats
 
 
 def check_pourcentages(value):
@@ -308,8 +309,12 @@ def basic_check(data_file):
 			del profile_to_occurence[key]
 
 		## select the profile that have the max occurence
-		global_profile = max(profile_to_occurence.iteritems(), key=operator.itemgetter(1))[0]
-		global_profile = global_profile.split("_")
+		## check that profile_to_occurence is not empty
+		if(bool(profile_to_occurence)):
+			global_profile = max(profile_to_occurence.iteritems(), key=operator.itemgetter(1))[0]
+			global_profile = global_profile.split("_")
+		else:
+			global_profile = "undef"
 
 		## compare to the header profile
 		if(global_profile == header_profile):
@@ -451,15 +456,124 @@ def consistency_check(data_file):
 	[IN PROGRESS]
 	"""
 
-
-
 	print "choucroute"
 
 
 
+def check_standard_deviation(data_file_name):
+	##
+	## -> Check the standard deviation for each variables
+	## in data_file_name.
+	## -> Return a dict variable to standard deviation
+	##
+
+	position_to_variable = {}
+	variable_to_distribution = {}
+	variable_to_standard_deviation = {}
+
+	## add scalar to distribution for each variables
+	## in data file.
+	cmpt = 0
+	input_data = open(data_file_name, "r")
+	for line in input_data:
+		line = line.split("\n")
+		line = line[0]
+		line_in_array = line.split(",")
+		
+		if(cmpt == 0):
+			index = 0
+			for variable in line_in_array:
+				position_to_variable[index] = variable
+				variable_to_distribution[variable] = []
+				variable_to_standard_deviation[variable] = "NA"
+				index +=1
+		else:
+			index = 0
+			for scalar in line_in_array:
+
+				try:
+					scalar = scalar.replace("\"", "")
+					scalar_to_add = float(scalar)
+					variable_to_distribution[position_to_variable[index]].append(scalar_to_add)
+				except:
+					scalar_to_add = "undef"				
+
+				index+=1
+
+		cmpt += 1
+	input_data.close()
+
+
+	## Compute the standard deviation
+	for key in variable_to_distribution.keys():
+		distribution = variable_to_distribution[key]
+		distribution = np.array(distribution)
+		if(len(distribution) > 1):
+			variable_to_standard_deviation[key] = np.std(distribution)
+		else:
+			variable_to_standard_deviation[key] = "NA" 
+
+	## return dict
+	return variable_to_standard_deviation
 
 
 
+def check_zscore(data_file_name):
+	##
+	## -> Compute the zscore mean for each variables in 
+	## data_file_name.
+	## -> Return mean of the zscore for each variable
+	##
+
+	position_to_variable = {}
+	variable_to_distribution = {}
+	variable_to_zscore_mean = {}
+
+	## add scalar to distribution for each variables
+	## in data file.
+	cmpt = 0
+	input_data = open(data_file_name, "r")
+	for line in input_data:
+		line = line.split("\n")
+		line = line[0]
+		line_in_array = line.split(",")
+		
+		if(cmpt == 0):
+			index = 0
+			for variable in line_in_array:
+				position_to_variable[index] = variable
+				variable_to_distribution[variable] = []
+				variable_to_zscore_mean[variable] = "NA"
+				index +=1
+		else:
+			index = 0
+			for scalar in line_in_array:
+
+				try:
+					scalar = scalar.replace("\"", "")
+					scalar_to_add = float(scalar)
+					variable_to_distribution[position_to_variable[index]].append(scalar_to_add)
+				except:
+					scalar_to_add = "undef"				
+
+				index+=1
+
+		cmpt += 1
+	input_data.close()
+
+
+	## Compute the standard deviation
+	for key in variable_to_distribution.keys():
+		distribution = variable_to_distribution[key]
+		distribution = np.array(distribution)
+		if(len(distribution) > 1):
+			zscores = stats.zscore(distribution)
+			variable_to_zscore_mean[key] = np.mean(zscores)
+		else:
+			variable_to_zscore_mean[key] = "NA" 
+
+	## return dict
+	return variable_to_zscore_mean
 
 
 
