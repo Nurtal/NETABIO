@@ -19,6 +19,7 @@ accuracy_image_file_name = paste(args[2], "RFE_accuracy.png", sep ="")
 
 ## Load the data
 data <- read.csv(data_file_name, stringsAsFactors=TRUE)
+data <- data[complete.cases(data), ]
 
 ## Prepare training scheme
 control <- rfeControl(functions=rfFuncs, method="cv", number=10)

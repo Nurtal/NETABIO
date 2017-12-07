@@ -43,6 +43,7 @@ def looking_for_outliers(input_vector, col_number):
 	"""
 	-> Flag outlier in the input_vector, return list of patients
 	   containing outliers
+	TODO : deal with int vector (no replace attribute)
 	"""
 
 	## init structure de retour

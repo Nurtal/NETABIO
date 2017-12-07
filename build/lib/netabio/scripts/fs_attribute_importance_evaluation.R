@@ -21,6 +21,7 @@ attribute_importance_plot_name = paste(args[2], "attribute_importance.png", sep 
 
 ## Load the data
 data <- read.csv(data_file_name, stringsAsFactors=TRUE)
+data <- data[complete.cases(data), ]
 
 ## Prepare training scheme
 control <- trainControl(method="repeatedcv", number=10, repeats=3)

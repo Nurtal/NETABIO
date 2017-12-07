@@ -129,11 +129,11 @@ def change_file_format(data_file_name, separator):
 		input_data_file.close()
 
 		# Exit The programm with a validation message
-		print "[*] File "+str(data_file_name)+" have been formated, from "+str(current_separator)+ " To "+str(separator)+" separator\n"
+		print "[*] File "+str(data_file_name)+" have been formated, from "+str(current_separator)+ " To "+str(separator)+" separator"
 
 	## Exit The programm with a warning message
 	else:
-		print "[!] Can't determine the separator used in "+str(data_file_name)+", can't reformat file\n"
+		print "[!] Can't determine the separator used in "+str(data_file_name)+", can't reformat file"
 
 
 

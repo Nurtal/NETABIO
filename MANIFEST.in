@@ -1,2 +1,3 @@
 include netabio/scripts/*.R
+include netabio/data/*.txt
 include README.md

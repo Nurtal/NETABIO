@@ -2,7 +2,7 @@
 ## Work on the variance and covariance of the attributes, ##
 ## look for redundant and near zero variance attributes   ##
 ## save all results in csv and text files                 ##
-## args[1] -> path to the input data 					  ##
+## args[1] -> path to the input data 			  ##
 ## args[2] -> path to the output folder                   ##
 ##--------------------------------------------------------##
 
@@ -21,6 +21,7 @@ variance_analysis_file_name = paste(args[2], "variance_analysis.csv", sep ="")
 
 ## Load the data
 data <- read.csv(data_file_name, stringsAsFactors=TRUE)
+data <- data[complete.cases(data), ]
 
 ## Calculate and save correlation matrix
 correlationMatrix <- cor(data[,2:ncol(data)])
