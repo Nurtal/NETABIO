@@ -9,6 +9,7 @@ import os.path
 import platform
 import os
 import glob
+from difflib import SequenceMatcher
 
 
 def detect_file_format(data_file_name):
@@ -212,6 +213,91 @@ def fix_file_name(input_file):
 			shutil.copy(input_file, output_file_name)
 	else:
 		print "[!] Can't find file "+str(input_file)
+
+
+
+
+
+
+
+def reformat_variables_names(input_file):
+	##
+	## [IN PROGRESS]
+	## 
+	## => Check the name of the variables in
+	## input files, delete identical part
+	## 	- Useful for specific project, use
+	##    with caution
+	## => Assume the file has a header and separator is a ","
+	##
+
+	## parameters
+	separator = ","
+
+	## get the variables names
+	original_variables = []
+	data = open(input_file, "r")
+	cmpt = 0
+	for line in data:
+		line = line.replace("\n", "")
+		if(cmpt == 0):
+			line_in_array = line.split(separator)
+			for variable in line_in_array:
+				original_variables.append(variable)
+		cmpt += 1
+	data.close()
+
+	##----------------##
+	## THE SMART PART ##
+	##----------------##
+	## [WARNING] => not functionnal for now
+	## [TODO] => deal with the bugs
+	## check for each variable if it share a commun prefix
+	## wich another variables
+	"""
+	new_variables = []
+	for variable in original_variables:
+
+		for variable_to_compare in original_variables:
+			if(variable != variable_to_compare):
+				match = SequenceMatcher(None, variable, variable_to_compare).find_longest_match(0, len(variable), 0, len(variable_to_compare))
+				new_variable = variable.replace(str(variable[match.a: match.a + match.size]), "")
+		
+				if(new_variable not in new_variables):
+					new_variables.append(new_variable)
+	
+	print new_variables
+	"""
+	##----------------##
+	## THE STUPID WAY ##
+	##----------------##
+	new_variables = []
+	new_header = ""
+	for variable in original_variables:
+		new_var = variable.replace("\\CrossSectional\\LowDimensionalData\\Luminex\\", "")
+		new_var = new_var.replace("\\", "")
+		new_variables.append(new_var)
+		new_header += str(new_var)+","
+	new_header = new_header[:-1]+"\n"
+
+	## Rewrite the file
+	output_file = open(input_file+".tmp", "w")
+	input_data = open(input_file, "r")
+	cmpt = 0
+	for line in input_data:
+		if(cmpt == 0):
+			output_file.write(new_header)
+		else:
+			output_file.write(line)
+		cmpt += 1
+	input_data.close()
+	output_file.close()
+
+	## clean files
+	os.remove(input_file)
+	shutil.copy(input_file+".tmp", input_file)
+	os.remove(input_file+".tmp")
+
 
 
 
