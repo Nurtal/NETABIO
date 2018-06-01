@@ -501,12 +501,8 @@ def generate_Flow_data_file(input_data_file, **optional_args):
 
 def split_transmart_data_file(input_data_file, **optional_args):
 	"""
-
-	IN PROGRESS
-
-
-	=> Create a csv file with only the Luminex Variables
-	and the diagnostic
+	=> Split a transmart type data file to several csv file (one for
+	each category of data found in the header)
 
 	- input_data_file is the name of the input data file
 	- optional_args contains the optional parameters, such as:
