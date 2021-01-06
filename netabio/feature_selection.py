@@ -43,7 +43,7 @@ def run_analyser(input_data, output_folder, analysis):
 	## Check if the output folder exist
 	valid_output = False
 	if(os.path.isdir(output_folder)):
-		valid_output = True	
+		valid_output = True
 
 	## Check if the input file exist
 	valid_input = False
@@ -68,9 +68,9 @@ def run_analyser(input_data, output_folder, analysis):
 
 
 	elif(not valid_output):
-		print "[ERROR] => Can't find the output folder "+str(output_folder)
+		print("[ERROR] => Can't find the output folder "+str(output_folder))
 	elif(not valid_input):
-		print "[ERROR] => Can't find the input file "+str(input_data)
+		print("[ERROR] => Can't find the input file "+str(input_data))
 
 
 
@@ -289,7 +289,7 @@ def write_html_report(report_file, data_file, result_folder):
 
 		## display graphic
 		report.write("<img src="+RFE_image+" style=\"width:600px;height:400px;\">\n")
-		
+
 		## Selected features
 		selected_features = []
 		data = open(RFE_selected_attributes, "r")
@@ -332,7 +332,7 @@ def write_html_report(report_file, data_file, result_folder):
 		for line in data:
 			line = line.replace("\n", "")
 			line_in_array = line.split(",")
-			
+
 			## deal with stupid format
 			if(cmpt == 0):
 				line_in_array = [" "] + line_in_array
@@ -390,7 +390,7 @@ def write_html_report(report_file, data_file, result_folder):
 				report.write("<td bgcolor=\"#5FB404\">"+summary_data[key]["Correlation"]+"</td>\n")
 			else:
 				report.write("<td bgcolor=\"#DF3A01\">"+summary_data[key]["Correlation"]+"</td>\n")
-			
+
 			if(summary_data[key]["Variance"] == "Pass"):
 				report.write("<td bgcolor=\"#5FB404\">"+str(summary_data[key]["Variance"])+"</td>\n")
 			else:
@@ -398,7 +398,7 @@ def write_html_report(report_file, data_file, result_folder):
 			if(summary_data[key]["RFE"] == "Pass"):
 				report.write("<td bgcolor=\"#5FB404\">"+str(summary_data[key]["RFE"])+"</td>\n")
 			else:
-				report.write("<td bgcolor=\"#DF3A01\">"+str(summary_data[key]["RFE"])+"</td>\n")	
+				report.write("<td bgcolor=\"#DF3A01\">"+str(summary_data[key]["RFE"])+"</td>\n")
 			if(summary_data[key]["Boruta"] == "Pass"):
 				report.write("<td bgcolor=\"#5FB404\">"+str(summary_data[key]["Boruta"])+"</td>\n")
 			else:
@@ -420,10 +420,10 @@ def write_html_report(report_file, data_file, result_folder):
 
 
 	elif(not valid_result_folder):
-		print "[ERROR] => Can't find the output folder "+str(result_folder)
+		print("[ERROR] => Can't find the output folder "+str(result_folder))
 	elif(not valid_data_file):
-		print "[ERROR] => Can't find the input file "+str(data_file)
+		print("[ERROR] => Can't find the input file "+str(data_file))
 	elif(not all_results_file_present):
-		print "[ERROR] => following files are missing in "+str(result_folder)+":"
+		print("[ERROR] => following files are missing in "+str(result_folder)+":")
 		for f in missing_files:
-			print "\t-> "+str(f)
+			print("\t-> "+str(f))

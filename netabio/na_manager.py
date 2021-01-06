@@ -3,14 +3,14 @@
 """
 
 import matplotlib
-matplotlib.use('TkAgg') 
+matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 import operator
 
 
 def check_NA_proportion_in_file(data_file_name):
 	"""
-	-> data_file_name is a csv file, generate via the 
+	-> data_file_name is a csv file, generate via the
 	   reformat_luminex_raw_data() function
 	-> Evaluate the proportion of NA values in each variable
 	-> return a dictionnary
@@ -27,7 +27,7 @@ def check_NA_proportion_in_file(data_file_name):
 		line = line.split("\n")
 		line = line[0]
 		line_in_array = line.split(",")
-		
+
 		if(cmpt == 0):
 			index = 0
 			for variable in line_in_array:
@@ -64,7 +64,7 @@ def display_NA_proportions(data_file_name):
 
 	## Get informations
 	variable_to_NA_count = check_NA_proportion_in_file(data_file_name)
-	
+
 	## Create Plot
 	plt.bar(range(len(variable_to_NA_count)), variable_to_NA_count.values(), align='center')
 	plt.xticks(range(len(variable_to_NA_count)), variable_to_NA_count.keys(), rotation=90)
@@ -111,7 +111,7 @@ def filter_NA_values(data_file_name):
 			variable_saved.append(key)
 
 	## Log message
-	print "[+] Selecting "+str(len(variable_saved))+" variables among "+str(len(variable_to_NA_proportion.keys())) +" ["+str((float(len(variable_to_NA_proportion.keys()))-float(len(variable_saved))) / float(len(variable_to_NA_proportion.keys()))*100)+"%]"
+	print("[+] Selecting "+str(len(variable_saved))+" variables among "+str(len(variable_to_NA_proportion.keys())) +" ["+str((float(len(variable_to_NA_proportion.keys()))-float(len(variable_saved))) / float(len(variable_to_NA_proportion.keys()))*100)+"%]")
 
 	## Create a new filtered data file
 	index_to_keep = []
@@ -144,7 +144,7 @@ def filter_NA_values(data_file_name):
 				index += 1
 
 			line_to_write = line_to_write[:-1]
-			output_data_file.write(line_to_write+"\n") 
+			output_data_file.write(line_to_write+"\n")
 		cmpt += 1
 	output_data_file.close()
 	input_data_file.close()
@@ -153,7 +153,7 @@ def filter_NA_values(data_file_name):
 
 def na_block_change(input_data_file, display):
 	"""
-	
+
 	*input_data_file is a string, the name of the data file
 	*display is a boolean, set to True to display grid
      optimization in console.
@@ -168,7 +168,7 @@ def na_block_change(input_data_file, display):
 	each action is associated to a cost, given by the formula:
 		- Cost = (1/nb_variable_type)*information_lost
 		  Where nb_variable_type is the number of line or column
-		  left in the dataset and information_lost is the number of 
+		  left in the dataset and information_lost is the number of
 		  scalar lost if the column/line is deleted.
 
 	The algorithm stop if:
@@ -177,7 +177,7 @@ def na_block_change(input_data_file, display):
 		- No missing values left in data file
 		- Iteration reach the mawimum of authorized iteration (treshold)
 
-	
+
 	require operator
 
 	Generate an csv output file with the tag "_NaBlockManaged"
@@ -187,7 +187,7 @@ def na_block_change(input_data_file, display):
 	##--------------------##
 	## General parameters ##
 	##--------------------##
-	
+
 
 	## Tresholds and structure
 	min_variable_authorized = 3
@@ -213,11 +213,11 @@ def na_block_change(input_data_file, display):
 	data_file = open(input_data_file, "r")
 	for line in data_file:
 		line = line.rstrip()
-		vector = line.split(",")		
+		vector = line.split(",")
 		grid.append(vector)
 	data_file.close()
 
-	
+
 	##-------------------##
 	## Grid optimisation ##
 	##-------------------##
@@ -231,17 +231,17 @@ def na_block_change(input_data_file, display):
 		## check the number of iteration
 		if(number_of_iteration >= maximum_number_of_iteration):
 			under_max_iteration = False
-			print "[-] reach maximum number of iteration :"+str(number_of_iteration)
+			print("[-] reach maximum number of iteration :"+str(number_of_iteration))
 
 		## count variables in grid
 		if(len(grid[0]) < min_variable_authorized):
 			variables_left_in_grid = False
-			print "[-] reach minimum number of variables :"+str(len(grid[0]))
+			print("[-] reach minimum number of variables :"+str(len(grid[0])))
 
 		## count patients in grid
 		if(len(grid) < min_patient_authorized):
 			patients_left_in_grid = False
-			print "[-] reach minimum number of patients :"+str(len(grid))
+			print("[-] reach minimum number of patients :"+str(len(grid)))
 
 		## count NA values in grid
 		na_count = 0
@@ -269,7 +269,7 @@ def na_block_change(input_data_file, display):
 			## Display grid ##
 			##--------------##
 			if(display):
-				print "-"*len(grid[0])*3
+				print("-"*len(grid[0])*3)
 				display_grid = []
 				na_char = "?"
 				good_char = "#"
@@ -291,9 +291,9 @@ def na_block_change(input_data_file, display):
 					display_vector_in_string = ""
 					for scalar in display_vector:
 						display_vector_in_string += " " + str(scalar)+ " "
-			
-					print display_vector_in_string
-				print "-"*len(grid[0])*3
+
+					print(display_vector_in_string)
+				print("-"*len(grid[0])*3)
 
 
 			##-------------------------##
@@ -305,7 +305,7 @@ def na_block_change(input_data_file, display):
 			number_of_patients = len(grid)
 			cmpt = 0
 			for vector in grid:
-				deleting_cost = 0 
+				deleting_cost = 0
 				na_in_vector = 0
 				information_in_vector = 0
 				for scalar in vector:
@@ -316,7 +316,7 @@ def na_block_change(input_data_file, display):
 				## cost of deleting this specific patient
 				deleting_cost = float((1.0/number_of_patients)*information_in_vector)
 				cmpt += 1
-				
+
 				possibles_action["line_"+str(cmpt)] = deleting_cost
 
 			## compute cost of deleting columns
@@ -331,7 +331,7 @@ def na_block_change(input_data_file, display):
 			number_of_columns = len(columns_list)
 			cmpt = 0
 			for vector in columns_list:
-				deleting_cost = 0 
+				deleting_cost = 0
 				na_in_vector = 0
 				information_in_vector = 0
 				for scalar in vector:

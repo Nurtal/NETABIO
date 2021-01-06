@@ -16,7 +16,7 @@ def detect_file_format(data_file_name):
 	"""
 	Because in biology, you always need to check
 	if a csv file is a real csv file ...
-	
+
 	-> Should return the separator used in
 	data file.
 	"""
@@ -91,7 +91,7 @@ def detect_file_format(data_file_name):
 
 	## Exit The programm with a warning message
 	else:
-		print "[!] Can't run an analysis\n"
+		print("[!] Can't run an analysis\n")
 		return best_separator
 
 
@@ -101,7 +101,7 @@ def detect_file_format(data_file_name):
 def change_file_format(data_file_name, separator):
 	"""
 	-> Change the separator used in data_file_name, to separator
-	-> Delete spaces in lines if space is not the separator 
+	-> Delete spaces in lines if space is not the separator
 	"""
 
 	## Define the extension
@@ -114,7 +114,7 @@ def change_file_format(data_file_name, separator):
 	## Get current separator
 	current_separator = detect_file_format(data_file_name)
 	if(current_separator != "undef"):
-		
+
 		## Re-write file with new separator
 		output_file_name = data_file_name.split(".")
 		output_file_name = output_file_name[0]
@@ -130,11 +130,11 @@ def change_file_format(data_file_name, separator):
 		input_data_file.close()
 
 		# Exit The programm with a validation message
-		print "[*] File "+str(data_file_name)+" have been formated, from "+str(current_separator)+ " To "+str(separator)+" separator"
+		print("[*] File "+str(data_file_name)+" have been formated, from "+str(current_separator)+ " To "+str(separator)+" separator")
 
 	## Exit The programm with a warning message
 	else:
-		print "[!] Can't determine the separator used in "+str(data_file_name)+", can't reformat file"
+		print("[!] Can't determine the separator used in "+str(data_file_name)+", can't reformat file")
 
 
 
@@ -158,7 +158,7 @@ def fix_file_name(input_file):
 			folder_separator = "\\"
 		elif(platform.system == "Linux"):
 			folder_separator = "/"
-		
+
 		input_file_name_path_in_array = input_file.split(folder_separator)
 		input_file_name = input_file_name_path_in_array[-1]
 
@@ -170,7 +170,7 @@ def fix_file_name(input_file):
 		input_file_name_in_array = input_file_name.split(".")
 		output_file_name = ""
 		if(len(input_file_name_in_array) > 2):
-			
+
 			## Deal with multiple dots in file name
 			for element in input_file_name_in_array[:-1]:
 				output_file_name += str(element)+"_"
@@ -190,7 +190,7 @@ def fix_file_name(input_file):
 
 			## get file extension
 			file_extension = input_file_name_in_array[-1]
-			
+
 			## init output filename
 			output_file_name = input_file_name_in_array[0]
 			output_file_name += "."+str(file_extension)
@@ -199,20 +199,20 @@ def fix_file_name(input_file):
 			output_file_name = output_file_name.replace(" ", "_")
 
 		else:
-			print "[!] It appears that the input file have no extensions ... "
+			print("[!] It appears that the input file have no extensions ... ")
 
 		## Finalise output file name
 		output_file_name = str(input_file_path) + str(output_file_name)
-		
+
 		## Check if input file is a valid file name
 		## if not copy make a copy of the file with a valid file name.
 		if(str(output_file_name) == str(input_file)):
-			print "[*] "+str(input_file) +" appears to be a valid file name"
+			print("[*] "+str(input_file) +" appears to be a valid file name")
 		else:
-			print "[*] Create a copy of "+str(input_file) +" \n[~] with the name: "+str(output_file_name)
+			print("[*] Create a copy of "+str(input_file) +" \n[~] with the name: "+str(output_file_name))
 			shutil.copy(input_file, output_file_name)
 	else:
-		print "[!] Can't find file "+str(input_file)
+		print("[!] Can't find file "+str(input_file))
 
 
 
@@ -223,7 +223,7 @@ def fix_file_name(input_file):
 def reformat_variables_names(input_file):
 	##
 	## [IN PROGRESS]
-	## 
+	##
 	## => Check the name of the variables in
 	## input files, delete identical part
 	## 	- Useful for specific project, use
@@ -262,10 +262,10 @@ def reformat_variables_names(input_file):
 			if(variable != variable_to_compare):
 				match = SequenceMatcher(None, variable, variable_to_compare).find_longest_match(0, len(variable), 0, len(variable_to_compare))
 				new_variable = variable.replace(str(variable[match.a: match.a + match.size]), "")
-		
+
 				if(new_variable not in new_variables):
 					new_variables.append(new_variable)
-	
+
 	print new_variables
 	"""
 	##----------------##
@@ -297,7 +297,3 @@ def reformat_variables_names(input_file):
 	os.remove(input_file)
 	shutil.copy(input_file+".tmp", input_file)
 	os.remove(input_file+".tmp")
-
-
-
-

@@ -66,7 +66,7 @@ def looking_for_outliers(input_vector, col_number):
 			index += 1
 		except:
 			do_nothing = 1
-		
+
 		patient += 1
 
 	## -> flag values distant from the median
@@ -127,20 +127,20 @@ def basic_check(data_file):
 	separator = biotoolbox.detect_file_format(data_file)
 
 	if(separator == "not_enough_line"):
-		print "[WARNING] => Very few lines in file (Less than 2)"
+		print("[WARNING] => Very few lines in file (Less than 2)")
 		log_file.write("[WARNING] => Very few lines in file (Less than 2)\n")
 	elif("Difference in lenght of lines" in separator):
-		
+
 		## get best separator
 		separator = separator.split("<sep>") # not sure what is it about
 
 		if(len(separator) > 1):
 			separator = separator[1]
-			print "[ERROR] => Difference in lenght of lines"
+			print("[ERROR] => Difference in lenght of lines")
 			log_file.write("[ERROR] => Difference in lenght of lines\n")
 		else:
 			separator = "undef"
-			print "[ERROR] => Difference in lenght of lines"
+			print("[ERROR] => Difference in lenght of lines")
 			log_file.write("[ERROR] => Difference in lenght of lines\n")
 
 		## check each lenght of line
@@ -171,7 +171,7 @@ def basic_check(data_file):
 		## Pas de problemes apparent avec la taille des lignes    ##
 		## Ecriture des logs                                      ##
 		##--------------------------------------------------------##
-		print "[PASS] => Same lenght for each lines"
+		print("[PASS] => Same lenght for each lines")
 		log_file.write("[PASS] => Same lenght for each lines\n")
 		log_file.write("[PASS] => exact separator found : "+str(separator)+"\n")
 
@@ -186,8 +186,8 @@ def basic_check(data_file):
 		input_data.close()
 
 		## Ecriture des logs
-		print "[PASS] => Found "+str(number_of_lines) +" lines"
-		print "[PASS] => Found "+str(number_of_columns) +" columns"
+		print("[PASS] => Found "+str(number_of_lines) +" lines")
+		print("[PASS] => Found "+str(number_of_columns) +" columns")
 		log_file.write("[PASS] => Found "+str(number_of_lines) +" lines\n")
 		log_file.write("[PASS] => Found "+str(number_of_columns) +" columns\n")
 
@@ -212,10 +212,10 @@ def basic_check(data_file):
 
 		## Write the logs & display the information
 		if(len(lines_containing_missing_values) > 0):
-			print "[WARNING] => "+str(len(lines_containing_missing_values))+ " lines with missing values"
+			print("[WARNING] => "+str(len(lines_containing_missing_values))+ " lines with missing values")
 			log_file.write("[WARNING] => "+str(len(lines_containing_missing_values))+ " lines with missing values\n")
 		for line in lines_containing_missing_values:
-			print "[WARNING] => line "+str(line)+ " contains NA values"
+			print("[WARNING] => line "+str(line)+ " contains NA values")
 			log_file.write("[WARNING] => line "+str(line)+ " contains NA values\n")
 
 
@@ -228,12 +228,12 @@ def basic_check(data_file):
 		for line in input_data:
 			line = line.replace("\n", "")
 			line_in_array = line.split(separator)
-			
+
 			index = 0
 			for scalar in line_in_array:
 				strange_percentage = check_pourcentages(scalar)
 				if(strange_percentage):
-					print "[WARNING] => line "+str(cmpt)+ ", column "+str(index)+" : invalid percentage"
+					print("[WARNING] => line "+str(cmpt)+ ", column "+str(index)+" : invalid percentage")
 					log_file.write("[WARNING] => line "+str(cmpt)+ ", column "+str(index)+" : invalid percentage\n")
 				index += 1
 			cmpt += 1
@@ -254,7 +254,7 @@ def basic_check(data_file):
 			line = line.replace("\n", "")
 			line_in_array = line.split(separator)
 			if(cmpt == 0):
-				
+
 				header_profile = []
 				index = 0
 				for scalar in line_in_array:
@@ -338,24 +338,24 @@ def basic_check(data_file):
 			## check if there is only string in the global profile
 			if("digit" in global_profile):
 				## Almost positive there is no header
-				print "[PASS] => No header detected"
+				print("[PASS] => No header detected")
 				log_file.write("[PASS] => No header detected\n")
 				header_detected = False
 			else:
 				## More tricky, means that we encounter only string
 				## in most of lines, hard to discriminate between the first line
 				## and the rest
-				print "[WARNING] => No header detected, low confidence"
+				print("[WARNING] => No header detected, low confidence")
 				log_file.write("[WARNING] => No header detected, low confidence\n")
 		else:
 			## Probably a header
-			print "[PASS] => Header detected"
+			print("[PASS] => Header detected")
 			log_file.write("[PASS] => Header detected\n")
 			header_detected = True
 
 		if(missing_values_in_first_line):
 			## Probably no header
-			print "[PASS] => No header detected"
+			print("[PASS] => No header detected")
 			log_file.write("[PASS] => No header detected\n")
 			header_detected = False
 
@@ -408,7 +408,7 @@ def basic_check(data_file):
 					except:
 						value_type = "string"
 					values_type.append(value_type)
-			
+
 			digit_count = 0
 			string_count = 0
 
@@ -427,7 +427,7 @@ def basic_check(data_file):
 					## Problem, digit and strngs in the same column
 					## but still more digit
 					column_to_type[key] = "digit"
-					print "[ERROR] => find string in a digit column : column "+str(key)
+					print("[ERROR] => find string in a digit column : column "+str(key))
 					log_file.write("[ERROR] => string found in a digit column : column "+str(key)+"\n")
 
 			else:
@@ -440,9 +440,9 @@ def basic_check(data_file):
 					## Problem, digit and strngs in the same column
 					## but still more or equal strings
 					column_to_type[key] = "string"
-					print "[ERROR] => find digit in a string column : column "+str(key)
+					print("[ERROR] => find digit in a string column : column "+str(key))
 					log_file.write("[ERROR] => digit found in a string column : column "+str(key)+"\n")
-						
+
 
 		##---------------------##
 		## Looking for outlier ##
@@ -455,9 +455,9 @@ def basic_check(data_file):
 			if(column_to_type[key] == "digit"):
 				flag_patient_in_vector = looking_for_outliers(vector, key)
 				for patient in flag_patient_in_vector:
-					print "[WARNINGS] => outlier detected, flag line "+str(patient)+" in column "+str(key)
+					print("[WARNINGS] => outlier detected, flag line "+str(patient)+" in column "+str(key))
 					log_file.write("[WARNINGS] => outlier detected, flag line "+str(patient)+" in column "+str(key)+"\n")
-		
+
 
 		##---------------##
 		## Check Z-score ##
@@ -465,16 +465,16 @@ def basic_check(data_file):
 
 		flag_variables = []
 
-		
+
 		variable_to_zscore_mean = check_zscore(data_file, separator, header_detected)
 		for var in variable_to_zscore_mean.keys():
 			if(variable_to_zscore_mean[var] != "NA"):
 				if(variable_to_zscore_mean[var] >= 2 or variable_to_zscore_mean[var] <= -2):
-					print "[WARNINGS] => Strange distribution detected, flag variable: "+str(var)
+					print("[WARNINGS] => Strange distribution detected, flag variable: "+str(var))
 					log_file.write("[WARNINGS] => Strange distribution detected, flag variable: "+str(var)+"\n")
 
 
-		
+
 
 
 
@@ -494,7 +494,7 @@ def consistency_check(data_file):
 	[IN PROGRESS]
 	"""
 
-	print "choucroute"
+	print("choucroute")
 
 
 
@@ -517,7 +517,7 @@ def check_standard_deviation(data_file_name):
 		line = line.split("\n")
 		line = line[0]
 		line_in_array = line.split(",")
-		
+
 		if(cmpt == 0):
 			index = 0
 			for variable in line_in_array:
@@ -534,7 +534,7 @@ def check_standard_deviation(data_file_name):
 					scalar_to_add = float(scalar)
 					variable_to_distribution[position_to_variable[index]].append(scalar_to_add)
 				except:
-					scalar_to_add = "undef"				
+					scalar_to_add = "undef"
 
 				index+=1
 
@@ -549,7 +549,7 @@ def check_standard_deviation(data_file_name):
 		if(len(distribution) > 1):
 			variable_to_standard_deviation[key] = np.std(distribution)
 		else:
-			variable_to_standard_deviation[key] = "NA" 
+			variable_to_standard_deviation[key] = "NA"
 
 	## return dict
 	return variable_to_standard_deviation
@@ -558,7 +558,7 @@ def check_standard_deviation(data_file_name):
 
 def check_zscore(data_file_name, separator, header_detected):
 	##
-	## -> Compute the zscore mean for each variables in 
+	## -> Compute the zscore mean for each variables in
 	## data_file_name.
 	## -> Return mean of the zscore for each variable
 	##
@@ -575,12 +575,12 @@ def check_zscore(data_file_name, separator, header_detected):
 		line = line.split("\n")
 		line = line[0]
 		line_in_array = line.split(separator)
-		
+
 
 		if(cmpt == 0):
 			index = 0
 			for variable in line_in_array:
-				
+
 				if(header_detected):
 					position_to_variable[index] = variable
 					variable_to_distribution[variable] = []
@@ -589,7 +589,7 @@ def check_zscore(data_file_name, separator, header_detected):
 					position_to_variable[index] = index
 					variable_to_distribution[index] = []
 					variable_to_zscore_mean[index] = "NA"
-				
+
 				index +=1
 
 		else:
@@ -601,7 +601,7 @@ def check_zscore(data_file_name, separator, header_detected):
 					scalar_to_add = float(scalar)
 					variable_to_distribution[position_to_variable[index]].append(scalar_to_add)
 				except:
-					scalar_to_add = "undef"				
+					scalar_to_add = "undef"
 
 				index+=1
 
@@ -617,7 +617,7 @@ def check_zscore(data_file_name, separator, header_detected):
 			zscores = stats.zscore(distribution)
 			variable_to_zscore_mean[key] = np.mean(zscores)
 		else:
-			variable_to_zscore_mean[key] = "NA" 
+			variable_to_zscore_mean[key] = "NA"
 
 	## return dict
 	return variable_to_zscore_mean
