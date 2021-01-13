@@ -10,6 +10,178 @@ from netabio import ATTRIBUTEIMPORTANCE_SCRIPT
 from netabio import RFE_SCRIPT
 from netabio import BORUTA_SCRIPT
 
+
+
+def run_boruta(input_data, output_folder):
+    """
+    This function run the Boruta algorithm on the input data
+    and save results in the output_folder.
+        - input_data is a string, the name (path) of the input data file
+        - output_folder is a string, the name (path) of the output folder
+
+    Three parameters can be modify to run the algorithm
+        - max_depth, the max depth of trees used in the random forest by
+          the Boruta algorithm
+        - max_iteration : max iteration for the algorithm
+        - verbose : display something (1 or 2) or nothing (0) in the terminal
+
+    Generate 1 file
+        - output_folder+"/Boruta_ranking.csv"
+    """
+
+    ## importation
+    import numpy as np
+    import pandas as pd
+    from sklearn.ensemble import RandomForestClassifier
+    from boruta import BorutaPy
+
+    ## parameters
+    max_depth = 5
+    max_iteration = 100
+    verbose = 2
+
+    ## set output file name
+    ranking_file_name = output_folder+"/Boruta_ranking.csv"
+
+    ## preprocess data
+    df = pd.read_csv(input_data)
+    df = df.dropna()
+    y = df[['LABEL']]
+    X = df.drop(columns=['LABEL'])
+
+    ## extract features
+    features = [f for f in X.columns]
+
+    ## prepare dataset
+    X = X.values
+    Y = y.values.ravel()
+
+    ## setup the RandomForrestClassifier as the estimator to use for Boruta
+    rf = RandomForestClassifier(n_jobs=-1, class_weight='balanced', max_depth=max_depth)
+
+    ## run Boruta
+    boruta_feature_selector = BorutaPy(
+        rf,
+        n_estimators='auto',
+        verbose=verbose,
+        random_state=4242,
+        max_iter = max_iteration,
+        perc = 90
+    )
+    boruta_feature_selector.fit(X, Y)
+
+    ## save extracted feature
+    output_file = open(ranking_file_name, "w")
+    output_file.write("VAR_NAME,SELECTED\n")
+    for x in range(0,X.shape[1]):
+        var_name = features[x]
+        selected = boruta_feature_selector.support_[x]
+        output_file.write(str(var_name)+","+str(selected)+"\n")
+    output_file.close()
+
+
+
+def run_rfe(input_data, output_folder):
+    """
+    This function run a Recursive feature elimination on the input data
+    and save results in the output_folder.
+        - input_data is a string, the name (path) of the input data file
+        - output_folder is a string, the name (path) of the output folder
+
+    First determine the optimal nb of features throught cross validation using
+    a decision tree classifier.
+    Then use this optimal nb of feature to run RFE and extract ranking info for
+    each feature.
+
+    Generate 3 files
+        - output_folder+"/RFE_fig.png"
+        - output_folder+"/RFE_ranking.csv"
+        - output_folder+"/RFE_nb_features.csv"
+    """
+
+    ## importation
+    from sklearn.feature_selection import RFE
+    from sklearn.tree import DecisionTreeClassifier
+    import pandas as pd
+    from numpy import mean
+    from numpy import std
+    from sklearn.datasets import make_classification
+    from sklearn.model_selection import cross_val_score
+    from sklearn.model_selection import RepeatedStratifiedKFold
+    from sklearn.feature_selection import RFECV
+    from sklearn.pipeline import Pipeline
+    from matplotlib import pyplot as plt
+
+    ## set up fig name
+    output_fig_name = output_folder+"/RFE_fig.png"
+    ranking_file_name = output_folder+"/RFE_ranking.csv"
+    nb_feature_file_name = output_folder+"/RFE_nb_features.csv"
+
+    ## preprocess data
+    df = pd.read_csv(input_data)
+    df = df.dropna()
+    y = df[['LABEL']]
+    X = df.drop(columns=['LABEL'])
+
+    ## parameters
+    min_nb_feature = 5
+    max_nb_feature = X.shape[1]
+    results = []
+    names = []
+    best_score = 0.0
+    best_nb_features = -1
+
+    ## explore configurations
+    for nb_feature in range(min_nb_feature, max_nb_feature):
+
+        ## create the model
+        rfe = RFE(estimator=DecisionTreeClassifier(), n_features_to_select=nb_feature)
+        model = DecisionTreeClassifier()
+
+        ## try cross validation
+        cv = RepeatedStratifiedKFold(n_splits=3, n_repeats=3, random_state=1)
+        scores = cross_val_score(model, X, y, scoring='accuracy', cv=cv, n_jobs=-1, error_score='raise')
+
+        ## update log info
+        results.append(scores)
+        names.append(nb_feature)
+
+        ## get optimal nb of feature
+        if(scores.mean() > best_score):
+            best_score = scores.mean()
+            best_nb_features = nb_feature
+
+    # plot model performance for comparison
+    plt.boxplot(results, labels=names, showmeans=True)
+    plt.xticks(rotation='vertical')
+    plt.savefig(output_fig_name)
+    plt.close()
+
+    ## run RFE with optimal nb_feature
+    rfe = RFE(estimator=DecisionTreeClassifier(), n_features_to_select=best_nb_features)
+    rfe.fit(X, y)
+
+    ## save ranking information
+    output_file = open(ranking_file_name, "w")
+    output_file.write("VAR_NAME,SELECTED,RANK\n")
+    variable_name_list = list(X.keys())
+    for i in range(X.shape[1]):
+        var_name = variable_name_list[i]
+        line_to_write = str(var_name)+","+str(rfe.support_[i])+","+str(rfe.ranking_[i])+"\n"
+        output_file.write(line_to_write)
+    output_file.close()
+
+    ## save nb_feature search information
+    output_file = open(nb_feature_file_name, "w")
+    output_file.write("NB_VAR,MEAN_ACC\n")
+    for i in range(0,len(names)):
+        var_nb = names[i]
+        mean_score = results[i].mean()
+        line_to_write = str(var_nb)+","+str(mean_score)+"\n"
+        output_file.write(line_to_write)
+    output_file.close()
+
+
 def run_analyser(input_data, output_folder, analysis):
 	"""
 	-> Run a R script wich perform a few analysis for feature selection
@@ -57,9 +229,21 @@ def run_analyser(input_data, output_folder, analysis):
 		elif(analysis == "attributeImportance"):
 			os.system("Rscript "+ATTRIBUTEIMPORTANCE_SCRIPT+" "+str(input_data)+" "+str(output_folder))
 		elif(analysis == "RFE"):
-			os.system("Rscript "+RFE_SCRIPT+" "+str(input_data)+" "+str(output_folder))
+
+			## call RFE function
+			run_rfe(input_data, output_folder)
+
+			# -> old stuff, call Rscript
+			#os.system("Rscript "+RFE_SCRIPT+" "+str(input_data)+" "+str(output_folder))
+
 		elif(analysis == "Boruta"):
-			os.system("Rscript "+BORUTA_SCRIPT+" "+str(input_data)+" "+str(output_folder))
+
+			## call Boruta function
+			run_boruta(input_data, output_folder)
+
+			# -> old stuff, call Rscript
+			#os.system("Rscript "+BORUTA_SCRIPT+" "+str(input_data)+" "+str(output_folder))
+
 		elif(analysis == "all"):
 			os.system("Rscript "+CORRELATIONMATRIX_SCRIPT+" "+str(input_data)+" "+str(output_folder))
 			os.system("Rscript "+ATTRIBUTEIMPORTANCE_SCRIPT+" "+str(input_data)+" "+str(output_folder))
